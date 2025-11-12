@@ -97,6 +97,17 @@ jobs:
           repository: "${{inputs.owner}}/${{inputs.repo}}"
           ref: ${{inputs.branch}}
           path: openWRT
+          submodules: 'recursive'
+
+      - name: 修复Git安全目录（允许操作openWRT子目录）
+        run: |
+         git config --global --add safe.directory ${{ github.workspace }}/openWRT
+         git config --local --add safe.directory ${{ github.workspace }}/openWRT
+
+      - name: 强制更新openWRT子模块
+        working-directory: openWRT
+        run: |
+         git submodule init && git submodule update --force --recursive
 
       - name: 复制当前仓库的配置文件到 openWRT 仓库  (Copy current repo config to openWRT repo)
         run: cp -f .config diy.sh openWRT/
