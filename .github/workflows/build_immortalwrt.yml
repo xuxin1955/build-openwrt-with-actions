@@ -56,25 +56,15 @@ jobs:
 
           
        - name: 克隆当前仓库 (Clone current repo)
-         uses: actions/checkout@v4
+         uses: actions/checkout@main
 
        - name: 克隆 openWRT 仓库 (Clone openWRT repo)
-         uses: actions/checkout@v4
+         uses: actions/checkout@main
          with:
           repository: "${{inputs.owner}}/${{inputs.repo}}"
           ref: ${{inputs.branch}}
           path: openWRT
           submodules: 'recursive'
-
-       - name: 修复Git安全目录（允许操作openWRT子目录）
-         run: |
-          git config --global --add safe.directory ${{ github.workspace }}/openWRT
-          git config --local --add safe.directory ${{ github.workspace }}/openWRT
-
-       - name: 强制更新openWRT子模块
-         working-directory: openWRT
-         run: |
-          git submodule init && git submodule update --force --recursive
 
        - name: 复制当前仓库的配置文件到 openWRT 仓库  (Copy current repo config to openWRT repo)
          run: cp -f .config diy.sh openWRT/
@@ -113,7 +103,7 @@ jobs:
 
        - name: 启用ssh生成了.config后在编译前上传配置(Upload config before build)
          if: ${{inputs.multithreading == true}}
-         uses: actions/upload-artifact@v4
+         uses: actions/upload-artifact@main
          with:
           name: config-before-build
           path: |
@@ -132,7 +122,7 @@ jobs:
          run: make -j1 V=s
 
        - name: 上传编译结果到 Artifact (Upload build result to Artifact)
-         uses: actions/upload-artifact@v4
+         uses: actions/upload-artifact@main
          with:
           name: openWRT-build-result
           path: openWRT/bin/targets
