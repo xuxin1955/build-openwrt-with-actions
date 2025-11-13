@@ -30,7 +30,6 @@ on:
         description: "使用files大法 (Whether to upload the etc files)"
         type: boolean
         default: false
-
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -41,7 +40,7 @@ jobs:
          
        - name: Initialization environment
          env:
-         DEBIAN_FRONTEND: noninteractive
+          DEBIAN_FRONTEND: noninteractive
          run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           sudo docker image prune --all --force
