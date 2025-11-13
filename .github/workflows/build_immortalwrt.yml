@@ -38,9 +38,11 @@ jobs:
     steps:
        - name: Checkout
          uses: actions/checkout@main
-      
-       - name: 下载编译所需的依赖 (Install the software packages required for compilation)
-          run: |
+         
+       - name: Initialization environment
+         env:
+         DEBIAN_FRONTEND: noninteractive
+         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           sudo docker image prune --all --force
           sudo apt update
@@ -57,84 +59,84 @@ jobs:
           mkbootimg --version
 
           
-      - name: 克隆当前仓库 (Clone current repo)
-        uses: actions/checkout@v4
+       - name: 克隆当前仓库 (Clone current repo)
+         uses: actions/checkout@v4
 
-      - name: 克隆 openWRT 仓库 (Clone openWRT repo)
-        uses: actions/checkout@v4
-        with:
+       - name: 克隆 openWRT 仓库 (Clone openWRT repo)
+         uses: actions/checkout@v4
+         with:
           repository: "${{inputs.owner}}/${{inputs.repo}}"
           ref: ${{inputs.branch}}
           path: openWRT
           submodules: 'recursive'
 
-      - name: 修复Git安全目录（允许操作openWRT子目录）
-        run: |
-         git config --global --add safe.directory ${{ github.workspace }}/openWRT
-         git config --local --add safe.directory ${{ github.workspace }}/openWRT
+       - name: 修复Git安全目录（允许操作openWRT子目录）
+         run: |
+          git config --global --add safe.directory ${{ github.workspace }}/openWRT
+          git config --local --add safe.directory ${{ github.workspace }}/openWRT
 
-      - name: 强制更新openWRT子模块
-        working-directory: openWRT
-        run: |
-         git submodule init && git submodule update --force --recursive
+       - name: 强制更新openWRT子模块
+         working-directory: openWRT
+         run: |
+          git submodule init && git submodule update --force --recursive
 
-      - name: 复制当前仓库的配置文件到 openWRT 仓库  (Copy current repo config to openWRT repo)
-        run: cp -f .config diy.sh openWRT/
+       - name: 复制当前仓库的配置文件到 openWRT 仓库  (Copy current repo config to openWRT repo)
+         run: cp -f .config diy.sh openWRT/
 
-      - name: 如果选择了上传 files 大法，则复制 files 目录到 openWRT 仓库 (If you choose to upload the etc files, copy the etc directory to the openWRT repo)
-        if: ${{inputs.isFiles == true}}
-        run: cp -r files openWRT/files
+       - name: 如果选择了上传 files 大法，则复制 files 目录到 openWRT 仓库 (If you choose to upload the etc files, copy the etc directory to the openWRT repo)
+         if: ${{inputs.isFiles == true}}
+         run: cp -r files openWRT/files
 
-      - name: 运行 diy.sh (Run diy.sh)
-        working-directory: openWRT
-        run: |
+       - name: 运行 diy.sh (Run diy.sh)
+         working-directory: openWRT
+         run: |
           chmod +x diy.sh
           ./diy.sh
 
-      - name: Update Feeds & Install Dependencies
-        working-directory: openWRT
-        run: |
-         ./scripts/feeds update -a
-         ./scripts/feeds install -a
+       - name: Update Feeds & Install Dependencies
+         working-directory: openWRT
+         run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
 
         
-      - name: Download package
-        id: package
-        run: |
-         cd openWRT
-         make defconfig
-         make download -j8 V=s
-         find dl -size -1024c -exec ls -l {} \;
-         find dl -size -1024c -exec rm -f {} \;
+       - name: Download package
+         id: package
+         run: |
+          cd openWRT
+          make defconfig
+          make download -j8 V=s
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
 
 
-      - name: 使用ssh连接编译环境，限时15分钟，可在连接后输入命令 `touch /tmp/keepalive` 保活 (Connect to the build environment using ssh)
-        if: ${{inputs.ssh == true}}
-        uses: csexton/debugger-action@master
+       - name: 使用ssh连接编译环境，限时15分钟，可在连接后输入命令 `touch /tmp/keepalive` 保活 (Connect to the build environment using ssh)
+         if: ${{inputs.ssh == true}}
+         uses: csexton/debugger-action@master
 
-      - name: 启用ssh生成了.config后在编译前上传配置(Upload config before build)
-        if: ${{inputs.multithreading == true}}
-        uses: actions/upload-artifact@v4
-        with:
+       - name: 启用ssh生成了.config后在编译前上传配置(Upload config before build)
+         if: ${{inputs.multithreading == true}}
+         uses: actions/upload-artifact@v4
+         with:
           name: config-before-build
           path: |
             openWRT/.config
             openWRT/feeds.conf.default
           include-hidden-files: true
 
-      - name: 多线程编译 openWRT (Build openWRT multithreading)
-        if: ${{inputs.multithreading == true}}
-        working-directory: openWRT
-        run: make -j$(nproc) V=s
+       - name: 多线程编译 openWRT (Build openWRT multithreading)
+         if: ${{inputs.multithreading == true}}
+         working-directory: openWRT
+         run: make -j$(nproc) V=s
 
-      - name: 单线程编译 openWRT (Build openWRT single thread)
-        if: ${{inputs.multithreading == false}}
-        working-directory: openWRT
-        run: make -j1 V=s
+       - name: 单线程编译 openWRT (Build openWRT single thread)
+         if: ${{inputs.multithreading == false}}
+         working-directory: openWRT
+         run: make -j1 V=s
 
-      - name: 上传编译结果到 Artifact (Upload build result to Artifact)
-        uses: actions/upload-artifact@v4
-        with:
+       - name: 上传编译结果到 Artifact (Upload build result to Artifact)
+         uses: actions/upload-artifact@v4
+         with:
           name: openWRT-build-result
           path: openWRT/bin/targets
