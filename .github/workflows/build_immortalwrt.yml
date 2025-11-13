@@ -127,9 +127,13 @@ jobs:
           chmod +x diy.sh
           ./diy.sh
 
-      - name: 更新并下载 feeds (Update and download feeds)
+      - name: Update Feeds & Install Dependencies
         working-directory: openWRT
-        run: ./scripts/feeds update -a && ./scripts/feeds install -a
+        run: |
+         ./scripts/feeds update -a
+         ./scripts/feeds install -y python3-distutils python3-lib2to3
+         ./scripts/feeds install -a
+
 
         
       - name: Download package
