@@ -74,23 +74,17 @@ jobs:
          if: ${{inputs.isFiles == true}}
          run: cp -r files openWRT/files
 
-       
-
-       
+       - name: 运行 diy.sh (Run diy.sh)
+         working-directory: openWRT
+         run: |
+          chmod +x diy.sh
+          ./diy.sh     
 
        - name: Update feeds
          run: cd openWRT && ./scripts/feeds update -a
 
        - name: Install feeds
          run: cd openWRT && ./scripts/feeds install -a
-
-       - name: Load custom configuration
-         run: |
-          [ -e files ] && mv files openWRT/files
-          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openWRT/.config
-          chmod +x $diy.sh
-          cd openWRT
-          $GITHUB_WORKSPACE/$diy.sh
 
 
         
