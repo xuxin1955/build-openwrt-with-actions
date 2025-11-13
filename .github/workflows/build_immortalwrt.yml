@@ -34,26 +34,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    name: 🚀 编译 (Build)
+
     steps:
-      - name: Before freeing up disk space
-        run: |
-          echo "Before freeing up disk space"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
+       - name: Checkout
+         uses: actions/checkout@main
       
-
-      - name: Free up disk space complete
-        run: |
-          echo "Free up disk space complete"
-          echo "=============================================================================="
-          df -hT
-          echo "=============================================================================="
-
-      - name: 下载编译所需的依赖 (Install the software packages required for compilation)
-        run: |
+       - name: 下载编译所需的依赖 (Install the software packages required for compilation)
+          run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           sudo docker image prune --all --force
           sudo apt update
