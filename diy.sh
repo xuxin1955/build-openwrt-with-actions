@@ -18,3 +18,10 @@ sed -i 's/192.168.1.1/192.168.1.2/g' package/base-files/files/bin/config_generat
 #git clone https://github.com/kenzok8/small.git package/small
 #git clone https://github.com/SunBK201/UA3F.git package/UA3F
 #git clone https://github.com/stevenjoezhang/luci-app-adguardhome.git package/ADGH
+
+
+#高通410
+git clone https://github.com/lkiuyu/luci-app-cpu-perf package/luci-app-cpu-perf
+git clone https://github.com/lkiuyu/luci-app-cpu-status package/luci-app-cpu-status
+git clone https://github.com/lkiuyu/luci-app-temp-status package/luci-app-temp-status
+git clone https://github.com/lkiuyu/DbusSmsForwardCPlus package/DbusSmsForwardCPlus
