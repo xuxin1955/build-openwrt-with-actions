@@ -91,6 +91,7 @@ jobs:
           cd rockchip-mkbootimg
           make
           sudo make install
+          mkbootimg --version
 
           
       - name: 克隆当前仓库 (Clone current repo)
