@@ -110,6 +110,13 @@ jobs:
             openWRT/.config
             openWRT/feeds.conf.default
           include-hidden-files: true
+          
+       - name: Check space usage
+         if: (!cancelled())
+         run: df -hT
+
+       - name: 查看 openWRT 目录中的文件
+         run: ls -la openWRT/
 
        - name: 多线程编译 openWRT (Build openWRT multithreading)
          if: ${{inputs.multithreading == true}}
@@ -120,6 +127,9 @@ jobs:
          if: ${{inputs.multithreading == false}}
          working-directory: openWRT
          run: make -j1 V=s
+
+       - name: Fix Git buffer
+         run: git config --global http.postBuffer 524288000
 
        - name: 上传编译结果到 Artifact (Upload build result to Artifact)
          uses: actions/upload-artifact@main
